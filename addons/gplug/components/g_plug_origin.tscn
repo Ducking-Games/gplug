@@ -1,0 +1,83 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwoql3je8x0ya"]
+
+[ext_resource type="Texture2D" uid="uid://ba2s1sl1sk3jn" path="res://addons/gplug/assets/github-mark-white.png" id="1_venju"]
+[ext_resource type="Texture2D" uid="uid://hmreu8yge1jq" path="res://addons/gplug/assets/gitlab-logo-700.png" id="2_c3i60"]
+
+[node name="GPlugOrigin" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "ID:"
+
+[node name="LineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+placeholder_text = "x"
+alignment = 1
+editable = false
+
+[node name="ReferenceRect" type="ReferenceRect" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="ReferenceRect2" type="ReferenceRect" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Origin:"
+
+[node name="optOrigin" type="OptionButton" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 2
+popup/item_0/text = "Github"
+popup/item_0/icon = ExtResource("1_venju")
+popup/item_1/text = "Gitlab"
+popup/item_1/icon = ExtResource("2_c3i60")
+popup/item_1/id = 1
+popup/item_1/disabled = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Custom URL:"
+
+[node name="LineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+placeholder_text = "https://ghe.company.com (optional)"
+editable = false
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Custom URL:"
