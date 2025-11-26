@@ -19,22 +19,40 @@ var gplug_settings: Dictionary[String, Dictionary] = {
 	}
 }
 
-func _enter_tree() -> void:
+func _get_plugin_name():
+	return "GPlug"
+
+func _has_main_screen() -> bool:
+	return true
+
+func _enable_plugin() -> void:
 	_apply_settings()
 	dock = packed_dock.instantiate()
 	dock.name = "GPlug"
-	add_control_to_dock(DOCK_SLOT_LEFT_UR, dock)
+	#add_control_to_dock(DOCK_SLOT_LEFT_UR, dock)
+	EditorInterface.get_editor_main_screen().add_child(dock)
+	_make_visible(false)
+	get_editor_interface().set_main_screen_editor("GPlug")
 	print_rich("[color=green]Loaded GPlug[/color]")
 
+func _enter_tree() -> void:
+	pass
 
-func _exit_tree() -> void:
+func _disable_plugin() -> void:
 	_revert_settings()
 	if dock and dock.is_inside_tree():
-		remove_control_from_docks(dock)
+		# if you don't do this you will make the main screen stuck
+		get_editor_interface().set_main_screen_editor("AssetLib")
 		dock.queue_free()
 		dock = null
 		print_rich("[color=orange]Unloaded GPlug... quack![/color]")
+
+func _exit_tree() -> void:
 	pass
+
+func _make_visible(visible: bool) -> void:
+	if dock:
+		dock.visible = visible
 
 func _apply_settings() -> void:
 	for setting in gplug_settings:

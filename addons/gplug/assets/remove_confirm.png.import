@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hmreu8yge1jq"
-path="res://.godot/imported/gitlab-logo-700.png-6530bda98d04ac518f5a1fd917d30a6a.ctex"
+uid="uid://80ep5q3bjjlj"
+path="res://.godot/imported/remove_confirm.png-73a10e3cb5f4ae275d20f09e4cca7c2b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/gplug/assets/gitlab-logo-700.png"
-dest_files=["res://.godot/imported/gitlab-logo-700.png-6530bda98d04ac518f5a1fd917d30a6a.ctex"]
+source_file="res://addons/gplug/assets/remove_confirm.png"
+dest_files=["res://.godot/imported/remove_confirm.png-73a10e3cb5f4ae275d20f09e4cca7c2b.ctex"]
 
 [params]
 
