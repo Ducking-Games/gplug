@@ -42,6 +42,7 @@ func _disable_plugin() -> void:
 	_revert_settings()
 	if dock and dock.is_inside_tree():
 		# if you don't do this you will make the main screen stuck
+		# TODO: only do this if the current main screen is GPlug
 		get_editor_interface().set_main_screen_editor("AssetLib")
 		dock.queue_free()
 		dock = null

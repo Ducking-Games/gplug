@@ -12,7 +12,7 @@
 script = ExtResource("2_k3qdf")
 metadata/_custom_type_script = "uid://dlu4u110xfle0"
 
-[node name="GPlugIntegration" type="FoldableContainer" node_paths=PackedStringArray("leIntegrationName", "obOrigin", "leRepository", "leBranch", "leRepoTarget", "leProjectTarget", "teNotes", "ilTargets")]
+[node name="GPlugIntegration" type="FoldableContainer" node_paths=PackedStringArray("leIntegrationName", "obOrigin", "leRepository", "leBranch", "leRepoTarget", "leProjectTarget", "teNotes", "ilTargets", "lblLastIntegratedHash", "lblLastIntegratedTime")]
 offset_right = 1152.0
 offset_bottom = 648.0
 size_flags_horizontal = 3
@@ -27,6 +27,8 @@ leRepoTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer/leRepoTarge
 leProjectTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer/leProjectTarget")
 teNotes = NodePath("MarginContainer/VBoxContainer/teIntegrationNotes")
 ilTargets = NodePath("MarginContainer/VBoxContainer/PanelContainer2/ilTargets")
+lblLastIntegratedHash = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedHash")
+lblLastIntegratedTime = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedTime")
 delete_integration_icon = ExtResource("2_u4x31")
 delete_integration_confirm_icon = ExtResource("4_hcfn4")
 run_integration_icon = ExtResource("3_k3qdf")
@@ -75,7 +77,7 @@ vertical_alignment = 1
 [node name="leRepo" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "user/repo-name"
+placeholder_text = "{user}/{repo-name}"
 
 [node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2

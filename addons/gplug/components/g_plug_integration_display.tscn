@@ -1,0 +1,186 @@
+[gd_scene load_steps=10 format=3 uid="uid://d3nxrbqbt6gw1"]
+
+[ext_resource type="Script" uid="uid://y71s1e2deymg" path="res://addons/gplug/components/g_plug_integration_display.gd" id="1_5thvl"]
+[ext_resource type="Texture2D" uid="uid://bsr4cgaxhrdp3" path="res://addons/gplug/assets/pause_disabled.png" id="1_6s3yy"]
+[ext_resource type="Texture2D" uid="uid://xcybwwca5qnn" path="res://addons/gplug/assets/remove.png" id="2_0ms8v"]
+[ext_resource type="Texture2D" uid="uid://186quos7q86q" path="res://addons/gplug/assets/integrate.png" id="2_7u27c"]
+[ext_resource type="Script" uid="uid://dlu4u110xfle0" path="res://addons/gplug/classes/gplug_integration.gd" id="2_yyqww"]
+[ext_resource type="Texture2D" uid="uid://80ep5q3bjjlj" path="res://addons/gplug/assets/remove_confirm.png" id="3_yyqww"]
+[ext_resource type="Texture2D" uid="uid://dqqmdty8fw6hb" path="res://addons/gplug/assets/integrate_busy.png" id="5_edquy"]
+[ext_resource type="Texture2D" uid="uid://cii6h3131ukdi" path="res://addons/gplug/assets/pause.png" id="6_cd8bn"]
+
+[sub_resource type="Resource" id="Resource_yyqww"]
+script = ExtResource("2_yyqww")
+metadata/_custom_type_script = "uid://dlu4u110xfle0"
+
+[node name="GPlugIntegrationDisplay" type="PanelContainer" node_paths=PackedStringArray("lblTitle", "leIntegrationName", "obOrigin", "leRepository", "leBranch", "leRepoTarget", "leProjectTarget", "teNotes", "ilTargets", "lblLastIntegratedHash", "lblLastIntegratedTime", "btnAddTarget", "btnRemoveTarget", "btnEnable", "btnDelete", "btnRun")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_5thvl")
+integration = SubResource("Resource_yyqww")
+lblTitle = NodePath("MarginContainer/VBoxContainer/Header/lblName")
+leIntegrationName = NodePath("MarginContainer/VBoxContainer/Details/leIntegrationName")
+obOrigin = NodePath("MarginContainer/VBoxContainer/Details/obOrigin")
+leRepository = NodePath("MarginContainer/VBoxContainer/Details/leRepo")
+leBranch = NodePath("MarginContainer/VBoxContainer/Details/leBranch")
+leRepoTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/leRepoTarget")
+leProjectTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/leProjectTarget")
+teNotes = NodePath("MarginContainer/VBoxContainer/teIntegrationNotes")
+ilTargets = NodePath("MarginContainer/VBoxContainer/PanelContainer2/ilTargets")
+lblLastIntegratedHash = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedHash")
+lblLastIntegratedTime = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedTime")
+btnAddTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/btnAddTarget")
+btnRemoveTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/btnRemoveTarget")
+btnEnable = NodePath("MarginContainer/VBoxContainer/Header/btnEnable")
+btnDelete = NodePath("MarginContainer/VBoxContainer/Header/btnRemove")
+btnRun = NodePath("MarginContainer/VBoxContainer/Header/btnRun")
+delete_integration_icon = ExtResource("2_0ms8v")
+delete_integration_confirm_icon = ExtResource("3_yyqww")
+run_integration_icon = ExtResource("2_7u27c")
+run_integration_busy_icon = ExtResource("5_edquy")
+enabled_integration_icon = ExtResource("6_cd8bn")
+disabled_integration_icon = ExtResource("1_6s3yy")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="btnEnable" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+toggle_mode = true
+icon = ExtResource("1_6s3yy")
+
+[node name="btnRemove" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+icon = ExtResource("2_0ms8v")
+
+[node name="lblName" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Addon Integration"
+horizontal_alignment = 1
+
+[node name="btnRun" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+icon = ExtResource("2_7u27c")
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Details" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 4
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+text = "Name:"
+
+[node name="leIntegrationName" type="LineEdit" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "name for this addon integration"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "Origin:"
+vertical_alignment = 1
+
+[node name="obOrigin" type="OptionButton" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "Repo:"
+vertical_alignment = 1
+
+[node name="leRepo" type="LineEdit" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "{user}/{repo-name}"
+
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "Branch:"
+vertical_alignment = 1
+
+[node name="leBranch" type="LineEdit" parent="MarginContainer/VBoxContainer/Details"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "main"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Targets:"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="leRepoTarget" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "/path/in/repo"
+
+[node name="leProjectTarget" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "/path/in/project"
+
+[node name="btnAddTarget" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Add Target"
+
+[node name="btnRemoveTarget" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Remove Target"
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="ilTargets" type="ItemList" parent="MarginContainer/VBoxContainer/PanelContainer2"]
+layout_mode = 2
+auto_width = true
+auto_height = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Notes:"
+
+[node name="teIntegrationNotes" type="TextEdit" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="lblLastIntegratedTime" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "Last Integrated: N/A"
+
+[node name="lblLastIntegratedHash" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Last Integrated Hash: N/A"
+horizontal_alignment = 2

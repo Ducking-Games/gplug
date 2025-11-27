@@ -87,7 +87,7 @@ func _github_commit_hash(addon: GPlugIntegration, token: String = "") -> String:
 
   var error: Error = http_request.request(url, headers)
   if error != OK:
-    glog._error("Failed to make HTTP request to %s" % url)
+    glog._ierror("Failed to make HTTP request to %s" % url)
     return ""
 
   var resp: Array = await http_request.request_completed
@@ -97,7 +97,7 @@ func _github_commit_hash(addon: GPlugIntegration, token: String = "") -> String:
   var response_body: PackedByteArray = resp[3]
 
   if result != OK or response_code != 200:
-    glog._error("HTTP request to %s failed with code %d" % [url, response_code])
+    glog._ierror("HTTP request to %s failed with code %d" % [url, response_code])
     return ""
   
   var body_str: String = response_body.get_string_from_utf8()
@@ -110,7 +110,7 @@ func get_archive(addon: GPlugIntegration, token: String = "") -> PackedByteArray
       var archive: PackedByteArray = await _github_get_archive(addon, token)
       return archive
     _:
-      glog._error("Origin %s not supported for downloading archive." % OriginName(addon.origin))
+      glog._ierror("Origin %s not supported for downloading archive." % OriginName(addon.origin))
       return PackedByteArray()
   
 func _github_get_archive(addon: GPlugIntegration, token: String = "") -> PackedByteArray:
@@ -125,7 +125,7 @@ func _github_get_archive(addon: GPlugIntegration, token: String = "") -> PackedB
 
   var error: Error = http_request.request(url, headers)
   if error != OK:
-    glog._error("Failed to make HTTP request to %s" % url)
+    glog._ierror("Failed to make HTTP request to %s" % url)
     return PackedByteArray()
 
   glog._iinfo("Downloading archive from %s..." % url)
@@ -136,12 +136,8 @@ func _github_get_archive(addon: GPlugIntegration, token: String = "") -> PackedB
   var response_body: PackedByteArray = resp[3]
 
   if result != OK or response_code != 200:
-    glog._error("HTTP request to %s failed with code %d" % [url, response_code])
+    glog._ierror("HTTP request to %s failed with code %d" % [url, response_code])
     return PackedByteArray()
-  
-  glog._success("Downloaded archive from %s successfully." % url)
-
-  var file: FileAccess
 
   return response_body
 

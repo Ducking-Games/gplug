@@ -15,7 +15,7 @@ static func _format(str: String, color: Color) -> String:
   return "[color=%s]%s[/color]" % [hex_color, str]
 
 static func _error(message: String) -> void:
-  _print(_format("[GPlug::Error] %s" % message, Color.RED))
+  _print(_format("[Erro] %s" % message, Color.RED))
 
 static func _ierror(message: String) -> void:
   _error("%s%s" % [gen_indent(), message])
@@ -27,13 +27,13 @@ static func _iinfo(message: String) -> void:
   _info("%s%s" % [gen_indent(), message])
 
 static func _success(message: String) -> void:
-  _print(_format("[Success] %s" % message, Color.GREEN))
+  _print(_format("[Plug] %s" % message, Color.GREEN))
 
 static func _isuccess(message: String) -> void:
   _success("%s%s" % [gen_indent(), message])
 
 static func _warn(message: String) -> void:
-  _print(_format("[Warning] %s" % message, Color.ORANGE))
+  _print(_format("[Warn] %s" % message, Color.ORANGE))
 
 static func _iwarn(message: String) -> void:
   _warn("%s%s" % [gen_indent(), message])

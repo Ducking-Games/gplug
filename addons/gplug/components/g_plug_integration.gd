@@ -16,12 +16,14 @@ signal delete_integration_request()
 @export var leProjectTarget: LineEdit
 @export var teNotes: TextEdit
 @export var ilTargets: ItemList
+@export var lblLastIntegratedHash: Label
+@export var lblLastIntegratedTime: Label
 
 @export_group("Icons")
 @export var delete_integration_icon: Texture2D
 @export var delete_integration_confirm_icon: Texture2D
 @export var run_integration_icon: Texture2D
-@export var enable_integration_icon: Texture2D
+@export var enabled_integration_icon: Texture2D
 @export var dark_enabled_integration_icon: Texture2D
 
 var btnEnable: Button
@@ -52,11 +54,23 @@ func _ready() -> void:
 		integration.name = new_text
 		title = new_text
 	)
+	obOrigin.item_selected.connect(func(idx: int):
+		integration.origin = GitGet.OriginIndex(obOrigin.get_item_text(idx))
+	)
+	leRepository.text_changed.connect(func(new_text: String):
+		integration.repo = new_text
+	)
+	leBranch.text_changed.connect(func(new_text: String):
+		integration.branch = new_text
+	)
+	teNotes.text_changed.connect(func():
+		integration.notes = teNotes.text
+	)
 	
 
 func _enter_tree() -> void:
 	btnEnable = Button.new()
-	btnEnable.icon = enable_integration_icon
+	#btnEnable.icon = enable_integration_icon
 	btnEnable.tooltip_text = "Disable Integration"
 	btnEnable.toggle_mode = true
 	btnEnable.flat = true
@@ -87,6 +101,7 @@ func _enter_tree() -> void:
 	for origin in GitGet.origins:
 		obOrigin.add_item(origin["name"])
 		obOrigin.set_item_icon(obOrigin.get_item_count() - 1, GitGet.origin_icons().get(origin["icon"]))
+		obOrigin.set_item_disabled((obOrigin.get_item_count() - 1), not origin["supported"])
 
 	_update_ui()
 
@@ -104,20 +119,22 @@ func _update_ui() -> void:
 		leBranch.text = integration.branch
 		teNotes.text = integration.notes
 		obOrigin.selected = int(integration.origin)
+		lblLastIntegratedHash.text = "Last Integrated: " + integration.last_integrated_hash if integration.last_integrated_hash != "" else "Last Integrated: N/A"
+		lblLastIntegratedTime.text = "At: " + integration.format_last_integrated_datetime()
 	else:
 		title = "Invalid Integration"
 		leIntegrationName.text = "Invalid Integration"
 
 func _refresh_targets_list() -> void:
 	ilTargets.clear()
-	var target_display: Array[String] = integration.targets.to_display()
+	var target_display: Array[String] = integration.format_targets()
 	for target_str in target_display:
 		ilTargets.add_item(target_str)
 
 func _enabled_toggled(pressed: bool) -> void:
 	integration.enabled = pressed
 	if integration.enabled:
-		btnEnable.icon = enable_integration_icon
+		#btnEnable.icon = enable_integration_icon
 		btnEnable.tooltip_text = "Disable Integration"
 		glog._success("Integration '%s' %s." % [integration.name, "enabled"])
 	else:
@@ -171,7 +188,7 @@ func _on_btn_add_target_pressed() -> void:
 	if leRepoTarget.text == "" or leProjectTarget.text == "":
 		glog._warn("Both Repo Target and Project Target must be specified to add a new target.")
 		return
-	integration.targets.add_target(leRepoTarget.text, leProjectTarget.text)
+	integration.add_target(leRepoTarget.text, leProjectTarget.text)
 	_refresh_targets_list()
 	leRepoTarget.text = ""
 	leProjectTarget.text = ""
@@ -181,6 +198,6 @@ func _on_btn_remove_target_pressed() -> void:
 	for idx in targets_selected:
 		var target_str: String = ilTargets.get_item_text(idx)
 		var repo: String = target_str.split(" -> ")[0].replace("repo::", "")
-		integration.targets.targets.erase(repo)
+		integration.remove_target(repo)
 	_refresh_targets_list()
 	targets_selected.clear()

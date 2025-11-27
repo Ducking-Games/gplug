@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cdcc63eqv1bvp" path="res://addons/gplug/components/g_plug_dock.gd" id="1_1eie5"]
 
-[node name="GPlugDock" type="PanelContainer" node_paths=PackedStringArray("integration_container")]
+[node name="GPlugDock" type="PanelContainer" node_paths=PackedStringArray("integration_container", "ilIntegrationList")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -11,33 +11,67 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_1eie5")
-integration_container = NodePath("VBoxContainer/ScrollContainer/PluginContainer")
+integration_container = NodePath("MarginContainer/VBoxContainer/HSplitContainer/SelectedIntegration")
+ilIntegrationList = NodePath("MarginContainer/VBoxContainer/HSplitContainer/ilIntegrationList")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-text = "Tracked Addons"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="btnSaveConfig" type="Button" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Save"
-
-[node name="btnAddTracking" type="Button" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Add"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="PluginContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="MenuBar" type="MenuBar" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="File" type="PopupMenu" parent="MarginContainer/VBoxContainer/HBoxContainer2/MenuBar"]
+item_count = 5
+item_0/text = "Add Integration"
+item_0/id = 0
+item_1/text = "Reload"
+item_1/id = 4
+item_2/id = 1
+item_2/separator = true
+item_3/text = "Save Backup"
+item_3/id = 2
+item_4/text = "Load From Backup"
+item_4/id = 3
+
+[node name="Workflow" type="PopupMenu" parent="MarginContainer/VBoxContainer/HBoxContainer2/MenuBar"]
+item_count = 2
+item_0/text = "Run All"
+item_0/id = 0
+item_1/text = "Disable All"
+item_1/id = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Tracked Integrations"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
 size_flags_vertical = 3
 
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/btnAddTracking" to="." method="_on_btn_add_tracking_pressed"]
+[node name="ilIntegrationList" type="ItemList" parent="MarginContainer/VBoxContainer/HSplitContainer"]
+layout_mode = 2
+allow_reselect = true
+auto_width = true
+item_count = 1
+item_0/text = "Select an Integration"
+item_0/selectable = false
+item_0/disabled = true
+
+[node name="SelectedIntegration" type="PanelContainer" parent="MarginContainer/VBoxContainer/HSplitContainer"]
+layout_mode = 2
+
+[connection signal="id_pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/MenuBar/File" to="." method="_on_file_id_pressed"]
+[connection signal="id_pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/MenuBar/Workflow" to="." method="_on_workflow_id_pressed"]
+[connection signal="item_selected" from="MarginContainer/VBoxContainer/HSplitContainer/ilIntegrationList" to="." method="_on_il_integration_list_item_selected"]
