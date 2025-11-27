@@ -18,13 +18,16 @@ signal delete_integration(integration: GPlugIntegration)
 @export var leProjectTarget: LineEdit
 @export var teNotes: TextEdit
 @export var ilTargets: ItemList
-@export var lblLastIntegratedHash: Label
-@export var lblLastIntegratedTime: Label
+@export var leLastIntegratedHash: LineEdit
+@export var leLastIntegratedTime: LineEdit
 @export var btnAddTarget: Button
 @export var btnRemoveTarget: Button
 @export var btnEnable: Button
 @export var btnDelete: Button
 @export var btnRun: Button
+@export var pbIntegrationProgress: ProgressBar
+@export var pbIntegrationStepProgress: ProgressBar
+@export var lblIntegrationStep: Label
 
 @export_group("Icons")
 @export var delete_integration_icon: Texture2D
@@ -51,6 +54,10 @@ func _ready() -> void:
 	awaiting_delete_timer.one_shot = true
 	awaiting_delete_timer.timeout.connect(_cancel_delete_wait)
 	add_child(awaiting_delete_timer)
+
+	pbIntegrationProgress.min_value = 0
+	pbIntegrationProgress.max_value = 5
+	pbIntegrationProgress.visible = false
 
 func _enter_tree() -> void:
 	for origin in GitGet.origins:
@@ -113,8 +120,8 @@ func refresh_display() -> void:
 		leRepository.text = integration.repo
 		leBranch.text = integration.branch
 		teNotes.text = integration.notes
-		lblLastIntegratedHash.text = integration.format_last_integration_hash()
-		lblLastIntegratedTime.text = integration.format_last_integrated_datetime()
+		leLastIntegratedHash.text = integration.last_integrated_hash if integration.last_integrated_hash != "" else "N/A"
+		leLastIntegratedTime.text = integration.format_last_integrated_datetime()
 		_refresh_targets()
 		_handle_enabled_toggle(integration.enabled)
 	else:
@@ -154,7 +161,7 @@ func _handle_run(ignore_enabled: bool) -> void:
 		if integration.enabled or ignore_enabled:
 			busy = true
 			btnRun.icon = run_integration_busy_icon
-			await _integrate()
+			await _integration_run()
 			busy = false
 			btnRun.icon = run_integration_icon
 		else:
@@ -196,6 +203,138 @@ func _handle_enabled_toggle(pressed: bool) -> void:
 	else:
 		glog._warn("Integration '%s' disabled." % integration.name)
 
+func _integration_run() -> void:
+	pbIntegrationProgress.value = 0
+	pbIntegrationProgress.max_value = 5
+	lblIntegrationStep.text = "Initializing..."
+	pbIntegrationProgress.visible = true
+	pbIntegrationStepProgress.value = 0
+	pbIntegrationStepProgress.visible = false
+
+	glog._iinfo("Integrating '%s'..." % integration.name)
+
+	var git: GitGet = GitGet.new()
+	add_child(git)
+
+	lblIntegrationStep.text = "Retrieving latest commit hash..."
+	pbIntegrationProgress.value = 1
+	var hash: String = await git.get_commit_hash(integration)
+	if hash == "":
+		glog._ierror("Failed to retrieve latest commit hash for integration '%s'." % integration.name)
+		git.queue_free()
+		pbIntegrationProgress.visible = false
+		return
+
+	lblIntegrationStep.text = "Downloading archive..."
+	pbIntegrationProgress.value = 2
+	var archive: PackedByteArray = await git.get_archive(integration)
+	if archive.size() == 0:
+		glog._ierror("Failed to retrieve archive for integration '%s'." % integration.name)
+		git.queue_free()
+		pbIntegrationProgress.visible = false
+		return
+	git.queue_free()
+	
+	lblIntegrationStep.text = "Preparing extraction..."
+	pbIntegrationProgress.value = 3
+	var root: DirAccess = DirAccess.open("res://")
+	if root == null:
+		glog._ierror("Failed to access project root for integration '%s'." % integration.name)
+		pbIntegrationProgress.visible = false
+		return
+
+	var tmp: DirAccess = DirAccess.create_temp(integration.name)
+	if tmp == null:
+		glog._ierror("Failed to create temporary directory for integration '%s'." % integration.name)
+		pbIntegrationProgress.visible = false
+		return
+
+	var archive_path: String = "%s/%s.zip" % [tmp.get_current_dir(), integration.name]
+
+	var archive_file: FileAccess = FileAccess.open(archive_path, FileAccess.WRITE)
+	if archive_file == null:
+		glog._ierror("Failed to create archive file for integration '%s'." % [integration.name])
+		pbIntegrationProgress.visible = false
+		return
+	archive_file.store_buffer(archive)
+	archive_file.close()
+	## wrote archive file
+
+	lblIntegrationStep.text = "Extracting archive..."
+	pbIntegrationProgress.value = 4
+	
+	var zip_reader: ZIPReader = ZIPReader.new()
+	var zip_err: Error = zip_reader.open(archive_path)
+	if zip_err != OK:
+		glog._ierror("Failed to open ZIP archive for integration '%s'." % integration.name)
+		pbIntegrationProgress.visible = false
+		pbIntegrationStepProgress.visible = false
+		return
+
+	var trim_prefix: String = "%s-%s/" % [integration.repository(), integration.branch]
+
+	var files: PackedStringArray = zip_reader.get_files()
+	pbIntegrationStepProgress.max_value = files.size()
+	pbIntegrationStepProgress.value = 0
+	pbIntegrationStepProgress.visible = true
+
+	for archived_file: String in files:
+		var trimmed_name: String = archived_file.trim_prefix(trim_prefix)
+
+		var destination: String = ""
+		var destination_dir: String = ""
+		for remote_path in integration.targets.keys():
+			if trimmed_name.begins_with(remote_path):
+				destination_dir = integration.targets[remote_path]
+				if destination_dir == ".":
+					destination = trimmed_name.get_file()
+				else:
+					destination = "%s/%s" % [destination_dir, trimmed_name.replace(remote_path, "")]
+
+		if destination_dir == "":
+			glog._iinfo("Skipping file '%s' for integration '%s' as it does not match any targets. (empty destination dir)" % [trimmed_name, integration.name])
+			pbIntegrationStepProgress.value += 1
+			continue
+
+		var mdir_err: Error = root.make_dir_recursive(destination.get_base_dir())
+		if mdir_err != OK:
+			glog._ierror("Failed to create directory for file '%s' in integration '%s'." % [destination, integration.name])
+			continue
+
+		## skip directories
+		if archived_file.ends_with("/"):
+			pbIntegrationStepProgress.value += 1
+			continue
+
+		var file_data: PackedByteArray = zip_reader.read_file(archived_file)
+		var dest_file: FileAccess = FileAccess.open(destination, FileAccess.WRITE)
+		if dest_file == null:
+			glog._ierror("Failed to open destination file '%s' for integration '%s'." % [destination, integration.name])
+			continue
+		dest_file.store_buffer(file_data)
+		dest_file.close()
+		pbIntegrationStepProgress.value += 1
+
+	pbIntegrationProgress.value = 5
+	lblIntegrationStep.text = "Cleaning up..."
+
+	pbIntegrationStepProgress.visible = false
+	var zip_close: Error = await zip_reader.close()
+	if zip_close != OK:
+		glog._ierror("Failed to close ZIP archive for integration '%s'." % integration.name)
+		pbIntegrationProgress.visible = false
+		return
+
+	integration.last_integrated_hash = hash
+	integration.last_integrated_time_dict = Time.get_datetime_dict_from_system()
+	glog._isuccess("Integration '%s' completed successfully." % integration.name)
+	pbIntegrationProgress.visible = false
+	
+
+	var fs = EditorInterface.get_resource_filesystem()
+	if not fs.is_scanning():
+		fs.scan()
+
 func _integrate() -> void:
 	glog._iinfo("Integrating '%s'..." % integration.name)
 
@@ -217,6 +356,11 @@ func _integrate() -> void:
 		return
 	git.queue_free()
 
+	var project_root: DirAccess = DirAccess.open("res://")
+	if project_root == null:
+		glog._ierror("Failed to access project root for integration '%s'." % integration.name)
+		return
+
 	var tmp_dir: DirAccess = DirAccess.create_temp(integration.name)
 	if tmp_dir == null:
 		glog._ierror("Failed to create temporary directory for integration '%s'." % integration.name)
@@ -227,6 +371,8 @@ func _integrate() -> void:
 	if integration_holding == null:
 		glog._ierror("Failed to create temporary integration directory for integration '%s'." % integration.name)
 		return
+
+	# Iterate the zip archive and extract relevant files
 
 	var archive_path: String = "%s/%s.zip" % [integration_holding.get_current_dir(), integration.name]
 
@@ -247,14 +393,33 @@ func _integrate() -> void:
 		glog._ierror("Failed to open ZIP archive for integration '%s'." % integration.name)
 		return
 
-	var prefix: String = "%s-%s/" % [integration.repository(), integration.branch]
+	var trim_prefix: String = "%s-%s/" % [integration.repository(), integration.branch]
 
 	for archived_file: String in zip_reader.get_files():
-		var internal_name: String = archived_file.trim_prefix(prefix)
-		#glog._iinfo("Processing archived file '%s' for integration '%s'..." % [internal_name, integration.name])
-		# need to remove prefix like inkgd-godot4/
-		if internal_name.trim_suffix("/") in integration.targets.keys():
-			glog._iinfo("Extracting target '%s' for integration '%s'..." % [archived_file, integration.name])
+		var trimmed_name: String = archived_file.trim_prefix(trim_prefix)
+
+		var destination_dir: String = ""
+		var destination: String = ""
+		# check if this file matches any targets
+		for remote_path in integration.targets.keys():
+			if trimmed_name.begins_with(remote_path):
+				destination_dir = integration.targets[remote_path]
+				destination = "%s/%s" % [destination_dir, trimmed_name.replace(destination_dir, "")]
+
+		# extract the file to the target destination
+		if destination != "":
+			var dest_dir_only: String = destination.get_base_dir()
+			project_root.make_dir_recursive(dest_dir_only)
+			
+			var file_data: PackedByteArray = zip_reader.read_file(archived_file)
+			var dest_file: FileAccess = FileAccess.open(destination, FileAccess.WRITE)
+			if dest_file == null:
+				glog._ierror("Failed to open destination file '%s' for integration '%s'." % [destination, integration.name])
+				continue
+			dest_file.store_buffer(file_data)
+			dest_file.close()
+			glog._iinfo("Extracted file '%s' to '%s' for integration '%s'." % [archived_file, destination, integration.name])
+
 
 	var zip_close: Error = await zip_reader.close()
 	if zip_close != OK:
@@ -262,6 +427,7 @@ func _integrate() -> void:
 		return
 
 	# copy repo target to project target
+	# from tmp/integration_holding/<internal_name> to integration.targets[target]
 
 	# clean up
 

@@ -127,9 +127,9 @@ static func from_dict(data: Dictionary) -> GPlugIntegration:
 
 ## format the timestamp of the last integration into a human-readable string
 func format_last_integrated_datetime() -> String:
-	var resp: String = "Last Integrated At: "
+
 	if not last_integrated_time_dict:
-		return resp + "Never"
+		return "Never"
 	var year: int = last_integrated_time_dict.get("year", 0)
 	var month: int = last_integrated_time_dict.get("month", 0)
 	var day: int = last_integrated_time_dict.get("day", 0)
@@ -137,15 +137,7 @@ func format_last_integrated_datetime() -> String:
 	var minute: int = last_integrated_time_dict.get("minute", 0)
 	var second: int = last_integrated_time_dict.get("second", 0)
 	if year == 0 or month == 0 or day == 0:
-		return resp + "Never"
-	return "%s%04d-%02d-%02d %02d:%02d:%02d" % [
-	resp, year, month, day, hour, minute, second
+		return "Never"
+	return "%04d-%02d-%02d %02d:%02d:%02d" % [
+		year, month, day, hour, minute, second
 	]
-
-func format_last_integration_hash() -> String:
-	var resp: String = "Last Integrated: "
-	if last_integrated_hash != "":
-		resp += last_integrated_hash
-	else:
-		resp += "N/A"
-	return resp

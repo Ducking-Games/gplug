@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://d3nxrbqbt6gw1"]
+[gd_scene load_steps=13 format=3 uid="uid://d3nxrbqbt6gw1"]
 
 [ext_resource type="Script" uid="uid://y71s1e2deymg" path="res://addons/gplug/components/g_plug_integration_display.gd" id="1_5thvl"]
 [ext_resource type="Texture2D" uid="uid://bsr4cgaxhrdp3" path="res://addons/gplug/assets/pause_disabled.png" id="1_6s3yy"]
@@ -8,12 +8,17 @@
 [ext_resource type="Texture2D" uid="uid://80ep5q3bjjlj" path="res://addons/gplug/assets/remove_confirm.png" id="3_yyqww"]
 [ext_resource type="Texture2D" uid="uid://dqqmdty8fw6hb" path="res://addons/gplug/assets/integrate_busy.png" id="5_edquy"]
 [ext_resource type="Texture2D" uid="uid://cii6h3131ukdi" path="res://addons/gplug/assets/pause.png" id="6_cd8bn"]
+[ext_resource type="Texture2D" uid="uid://ba2s1sl1sk3jn" path="res://addons/gplug/assets/github-mark-white.png" id="9_cd8bn"]
+[ext_resource type="Texture2D" uid="uid://hmreu8yge1jq" path="res://addons/gplug/assets/gitlab-logo-700.png" id="10_vm6pa"]
 
 [sub_resource type="Resource" id="Resource_yyqww"]
 script = ExtResource("2_yyqww")
 metadata/_custom_type_script = "uid://dlu4u110xfle0"
 
-[node name="GPlugIntegrationDisplay" type="PanelContainer" node_paths=PackedStringArray("lblTitle", "leIntegrationName", "obOrigin", "leRepository", "leBranch", "leRepoTarget", "leProjectTarget", "teNotes", "ilTargets", "lblLastIntegratedHash", "lblLastIntegratedTime", "btnAddTarget", "btnRemoveTarget", "btnEnable", "btnDelete", "btnRun")]
+[sub_resource type="LabelSettings" id="LabelSettings_cd8bn"]
+font_color = Color(1, 1, 1, 0.38431373)
+
+[node name="GPlugIntegrationDisplay" type="PanelContainer" node_paths=PackedStringArray("lblTitle", "leIntegrationName", "obOrigin", "leRepository", "leBranch", "leRepoTarget", "leProjectTarget", "teNotes", "ilTargets", "leLastIntegratedHash", "leLastIntegratedTime", "btnAddTarget", "btnRemoveTarget", "btnEnable", "btnDelete", "btnRun", "pbIntegrationProgress", "pbIntegrationStepProgress", "lblIntegrationStep")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -32,13 +37,16 @@ leRepoTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/leRepoTarg
 leProjectTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/leProjectTarget")
 teNotes = NodePath("MarginContainer/VBoxContainer/teIntegrationNotes")
 ilTargets = NodePath("MarginContainer/VBoxContainer/PanelContainer2/ilTargets")
-lblLastIntegratedHash = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedHash")
-lblLastIntegratedTime = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/lblLastIntegratedTime")
+leLastIntegratedHash = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/leLastHash")
+leLastIntegratedTime = NodePath("MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/leLastTime")
 btnAddTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/btnAddTarget")
 btnRemoveTarget = NodePath("MarginContainer/VBoxContainer/HBoxContainer2/btnRemoveTarget")
 btnEnable = NodePath("MarginContainer/VBoxContainer/Header/btnEnable")
 btnDelete = NodePath("MarginContainer/VBoxContainer/Header/btnRemove")
 btnRun = NodePath("MarginContainer/VBoxContainer/Header/btnRun")
+pbIntegrationProgress = NodePath("MarginContainer/VBoxContainer/pbIntegrate")
+pbIntegrationStepProgress = NodePath("MarginContainer/VBoxContainer/pbIntegrationStep")
+lblIntegrationStep = NodePath("MarginContainer/VBoxContainer/pbIntegrate/lblIntegrationProg")
 delete_integration_icon = ExtResource("2_0ms8v")
 delete_integration_confirm_icon = ExtResource("3_yyqww")
 run_integration_icon = ExtResource("2_7u27c")
@@ -61,6 +69,7 @@ layout_mode = 2
 
 [node name="btnEnable" type="Button" parent="MarginContainer/VBoxContainer/Header"]
 layout_mode = 2
+tooltip_text = "Enable Integration"
 toggle_mode = true
 icon = ExtResource("1_6s3yy")
 
@@ -71,12 +80,32 @@ icon = ExtResource("2_0ms8v")
 [node name="lblName" type="Label" parent="MarginContainer/VBoxContainer/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Addon Integration"
+text = "New Integration"
 horizontal_alignment = 1
 
 [node name="btnRun" type="Button" parent="MarginContainer/VBoxContainer/Header"]
 layout_mode = 2
 icon = ExtResource("2_7u27c")
+
+[node name="pbIntegrate" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="lblIntegrationProg" type="Label" parent="MarginContainer/VBoxContainer/pbIntegrate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Preparing to integrate..."
+label_settings = SubResource("LabelSettings_cd8bn")
+vertical_alignment = 1
+
+[node name="pbIntegrationStep" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+show_percentage = false
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -92,6 +121,7 @@ text = "Name:"
 [node name="leIntegrationName" type="LineEdit" parent="MarginContainer/VBoxContainer/Details"]
 layout_mode = 2
 size_flags_horizontal = 3
+text = "New Integration"
 placeholder_text = "name for this addon integration"
 
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/Details"]
@@ -103,6 +133,50 @@ vertical_alignment = 1
 [node name="obOrigin" type="OptionButton" parent="MarginContainer/VBoxContainer/Details"]
 layout_mode = 2
 size_flags_horizontal = 3
+selected = 0
+item_count = 12
+popup/item_0/text = "github"
+popup/item_0/icon = ExtResource("9_cd8bn")
+popup/item_0/id = 0
+popup/item_1/text = "gitlab"
+popup/item_1/icon = ExtResource("10_vm6pa")
+popup/item_1/id = 1
+popup/item_1/disabled = true
+popup/item_2/text = "github"
+popup/item_2/icon = ExtResource("9_cd8bn")
+popup/item_2/id = 2
+popup/item_3/text = "gitlab"
+popup/item_3/icon = ExtResource("10_vm6pa")
+popup/item_3/id = 3
+popup/item_3/disabled = true
+popup/item_4/text = "github"
+popup/item_4/icon = ExtResource("9_cd8bn")
+popup/item_4/id = 4
+popup/item_5/text = "gitlab"
+popup/item_5/icon = ExtResource("10_vm6pa")
+popup/item_5/id = 5
+popup/item_5/disabled = true
+popup/item_6/text = "github"
+popup/item_6/icon = ExtResource("9_cd8bn")
+popup/item_6/id = 6
+popup/item_7/text = "gitlab"
+popup/item_7/icon = ExtResource("10_vm6pa")
+popup/item_7/id = 7
+popup/item_7/disabled = true
+popup/item_8/text = "github"
+popup/item_8/icon = ExtResource("9_cd8bn")
+popup/item_8/id = 8
+popup/item_9/text = "gitlab"
+popup/item_9/icon = ExtResource("10_vm6pa")
+popup/item_9/id = 9
+popup/item_9/disabled = true
+popup/item_10/text = "github"
+popup/item_10/icon = ExtResource("9_cd8bn")
+popup/item_10/id = 10
+popup/item_11/text = "gitlab"
+popup/item_11/icon = ExtResource("10_vm6pa")
+popup/item_11/id = 11
+popup/item_11/disabled = true
 
 [node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/Details"]
 layout_mode = 2
@@ -124,6 +198,7 @@ vertical_alignment = 1
 [node name="leBranch" type="LineEdit" parent="MarginContainer/VBoxContainer/Details"]
 layout_mode = 2
 size_flags_horizontal = 3
+text = "main"
 placeholder_text = "main"
 
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
@@ -167,20 +242,30 @@ text = "Notes:"
 [node name="teIntegrationNotes" type="TextEdit" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
-size_flags_vertical = 3
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
 
 [node name="lblLastIntegratedTime" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 layout_mode = 2
-text = "Last Integrated: N/A"
+text = "Last Integrated At:"
+
+[node name="leLastTime" type="LineEdit" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
 
 [node name="lblLastIntegratedHash" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Last Integrated Hash: N/A"
+text = "Last Integrated:"
 horizontal_alignment = 2
+
+[node name="leLastHash" type="LineEdit" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false

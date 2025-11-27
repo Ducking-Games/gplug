@@ -52,7 +52,8 @@ func _run_all() -> void:
 	for integration in integration_container.get_children():
 		var this_integration: GPlugIntegrationDisplay = integration as GPlugIntegrationDisplay
 		if this_integration.integration.enabled:
-			this_integration.run_integration.emit(false)
+			#this_integration.run_integration.emit(false)
+			await this_integration._handle_run(false)
 
 func _disable_all() -> void:
 	glog._info("Disabling all integrations...")

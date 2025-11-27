@@ -18,6 +18,11 @@ config/icon="res://icon.svg"
 
 project/assembly_name="gplug"
 
+[inkgd]
+
+use_mono_runtime=true
+register_templates=true
+
 [rendering]
 
 renderer/rendering_method="mobile"
